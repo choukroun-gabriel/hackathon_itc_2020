@@ -28,7 +28,7 @@ def dummy_company(value):
         return 1
 
 
-def dummy_wfh(value):
+def dummy_yes_no(value):
     if value.lower() == 'no':
         return 0
     if value.lower() == 'yes':
@@ -37,20 +37,29 @@ def dummy_wfh(value):
 
 @app.route('/predict')
 def predict():
-    with open('stress_model.pkl', 'rb') as input_file:
+    with open('stress_model_enhanced.pkl', 'rb') as input_file:
         gnb = load(input_file)
 
     # Scaling
-    fatigue = min_max_scale(request.args.get('fatigue'), min=0, max=10)
+    # fatigue = min_max_scale(request.args.get('fatigue'), min=0, max=10)
     designation = min_max_scale(request.args.get('designation'), min=0, max=5)
     hours_worked = min_max_scale(request.args.get('hours_worked'), min=1, max=10)
+    concentration_score = min_max_scale(request.args.get('concentration_score'), min=0, max=5)
+    headache_score = min_max_scale(request.args.get('headache_score'), min=0, max=5)
+    sleep_score = min_max_scale(request.args.get('sleep_score'), min=0, max=5)
+    appetite_score = min_max_scale(request.args.get('appetite_score'), min=0, max=5)
+    motivation_score = min_max_scale(request.args.get('motivation_score'), min=0, max=5)
 
     # Dumming
     gender = dummy_gender(request.args.get('gender'))
     company_type = dummy_company(request.args.get('company_type'))
-    wfh_setup = dummy_wfh(request.args.get('wfh_setup'))
+    wfh_setup = dummy_yes_no(request.args.get('wfh_setup'))
+    weight_score = dummy_yes_no(request.args.get('weight_score'))
+    apathy_score = dummy_yes_no(request.args.get('apathy_score'))
 
-    array = np.reshape([fatigue, designation, hours_worked, gender, company_type, wfh_setup], (1, -1))
+    array = np.reshape([hours_worked, designation, gender, company_type, wfh_setup,
+                        concentration_score, headache_score, sleep_score, appetite_score,
+                        motivation_score, weight_score, apathy_score], (1, -1))
     result = gnb.predict(array.astype(float))
 
     return str(result)
