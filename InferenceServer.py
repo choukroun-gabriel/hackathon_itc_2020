@@ -1,4 +1,5 @@
 from flask import Flask, request
+from flask_cors import CORS, cross_origin
 from pickle import load
 import numpy as np
 import pandas as pd
@@ -8,6 +9,8 @@ import sklearn
 
 # Create flask application
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 
 def min_max_scale(value, min, max):
@@ -36,6 +39,7 @@ def dummy_yes_no(value):
 
 
 @app.route('/predict')
+@cross_origin()
 def predict():
     with open('stress_model_enhanced.pkl', 'rb') as input_file:
         gnb = load(input_file)
